@@ -2,60 +2,37 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox spacing="10" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="biblioteca.controllers.LibroController">
-
-    <HBox spacing="10">
-        <Label text="ISBN:" prefWidth="100"/>
-        <TextField fx:id="txtIsbn"/>
-    </HBox>
-
-    <HBox spacing="10">
-        <Label text="Título:" prefWidth="100"/>
-        <TextField fx:id="txtTitulo"/>
-    </HBox>
-
-
-    <HBox spacing="10">
-        <Label text="Año:" prefWidth="100"/>
-        <TextField fx:id="txtAnio"/>
-    </HBox>
-
-
-    <HBox spacing="10">
-        <Label text="Categoría:" prefWidth="100"/>
-        <ComboBox fx:id="cmbCategoria"/>
-    </HBox>
-
-
-    <HBox spacing="10">
-        <Label text="Tipo:" prefWidth="100"/>
-        <ComboBox fx:id="cmbTipo"/>
-    </HBox>
-
-
-    <HBox spacing="10">
-        <Label text="Formato:" prefWidth="100"/>
-        <TextField fx:id="txtFormato"/>
-    </HBox>
-
-
-    <HBox spacing="10">
-        <Label text="Duración (seg):" prefWidth="100"/>
-        <TextField fx:id="txtDuracion"/>
-    </HBox>
-
-
-    <Label text="Autor"/>
-
-    <HBox spacing="10">
-        <TextField fx:id="txtNombreAutor" promptText="Nombre"/>
-        <TextField fx:id="txtApellidosAutor" promptText="Apellidos"/>
-        <TextField fx:id="txtNacionalidadAutor" promptText="Nacionalidad"/>
-        <Button text="Añadir" onAction="#onAddAutor"/>
-    </HBox>
-
-    <ListView fx:id="listaAutores" prefHeight="100"/>
-
-</VBox>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="689.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="biblioteca.vista.controllers.LibroController">
+   <children>
+      <Label layoutX="45.0" layoutY="77.0" text="Título:" />
+      <Label layoutX="45.0" layoutY="115.0" text="Año:" />
+      <Label layoutX="45.0" layoutY="156.0" text="Categoría:" />
+      <Label layoutX="45.0" layoutY="200.0" text="Tipo:" />
+      <Label layoutX="45.0" layoutY="237.0" text="Formato:" />
+      <Label layoutX="45.0" layoutY="275.0" text="Duración (seg):" />
+      <Label layoutX="45.0" layoutY="39.0" text="ISBN" />
+      <TextField fx:id="txtISBN" layoutX="131.0" layoutY="35.0" promptText="123456789123" />
+      <TextField fx:id="txtTitulo" layoutX="131.0" layoutY="73.0" promptText="Bleach" />
+      <TextField fx:id="txtAnio" layoutX="131.0" layoutY="111.0" promptText="2003" />
+      <TextField fx:id="txtFormato" layoutX="131.0" layoutY="233.0" />
+      <TextField fx:id="txtDuracion" layoutX="131.0" layoutY="271.0" />
+      <ComboBox fx:id="cmbCategoria" layoutX="131.0" layoutY="152.0" prefWidth="150.0" />
+      <ComboBox fx:id="cmbTipo" layoutX="131.0" layoutY="196.0" prefWidth="150.0" />
+      <Label layoutX="261.0" layoutY="306.0" text="Autores">
+         <font>
+            <Font size="27.0" />
+         </font>
+      </Label>
+      <Label layoutX="14.0" layoutY="365.0" text="Nombre:" />
+      <TextField fx:id="txtNombreAutor" layoutX="69.0" layoutY="361.0" prefHeight="25.0" prefWidth="102.0" promptText="Tite" />
+      <Label layoutX="199.0" layoutY="365.0" text="Apellidos:" />
+      <TextField fx:id="txtApellidosAutor" layoutX="260.0" layoutY="361.0" prefHeight="25.0" prefWidth="102.0" promptText="Kubo" />
+      <Label layoutX="379.0" layoutY="365.0" text="Nacionalidad:" />
+      <TextField fx:id="txtNacionalidadAutor" layoutX="460.0" layoutY="361.0" prefHeight="25.0" prefWidth="102.0" promptText="Japonés" />
+      <ListView fx:id="listaAutores" layoutX="31.0" layoutY="395.0" prefHeight="200.0" prefWidth="422.0" />
+      <Button fx:id="btnAddAutor" layoutX="469.0" layoutY="421.0" mnemonicParsing="false" onAction="#onAddAutor" prefHeight="47.0" prefWidth="93.0" text="Agregar" />
+      <Button fx:id="btnDeleteAutor" layoutX="472.0" layoutY="522.0" mnemonicParsing="false" onAction="#onDeleteAutor" prefHeight="47.0" prefWidth="93.0" text="Eliminar" />
+   </children>
+</AnchorPane>

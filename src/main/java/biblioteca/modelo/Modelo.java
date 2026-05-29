@@ -51,6 +51,9 @@ public class Modelo {
     public boolean bajaUsuario(Usuario u) {
         return usuarios.baja(u);
     }
+    public boolean modificarUsuario(Usuario u) {
+        return usuarios.modificar(u);
+    }
     public Usuario buscarUsuario(Usuario u) {
         return usuarios.buscar(u);
     }
@@ -64,6 +67,9 @@ public class Modelo {
     }
     public boolean bajaLibro(Libro l) {
         return libros.baja(l);
+    }
+    public boolean modificarLibro(Libro l) {
+        return libros.modificar(l);
     }
     public Libro buscarLibro(Libro l) {
         return libros.buscar(l);

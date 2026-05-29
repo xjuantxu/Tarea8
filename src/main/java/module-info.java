@@ -6,7 +6,7 @@ module biblioteca {
 
     opens biblioteca to javafx.fxml;
     exports biblioteca;
-    exports biblioteca.controllers;
-    opens biblioteca.controllers to javafx.fxml;
+    exports biblioteca.vista.controllers;
+    opens biblioteca.vista.controllers to javafx.fxml;
     opens biblioteca.modelo.dominio to javafx.base;
 }

@@ -1,8 +1,8 @@
-package biblioteca.controllers;
+package biblioteca.vista.controllers;
 
 import biblioteca.controlador.Controlador;
 
-public class UsuariosController {
+public class PrestamosController {
 
     private Controlador controlador;
 

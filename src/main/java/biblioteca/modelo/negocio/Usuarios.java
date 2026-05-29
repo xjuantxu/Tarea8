@@ -110,6 +110,82 @@ public class Usuarios {
             throw new RuntimeException("Error al borrar usuario.", e);
         }
     }
+
+    public boolean modificar(Usuario usuario) {
+
+        if (usuario == null) {
+            return false;
+        }
+
+        String sqlUsuario = """
+                UPDATE usuario
+                SET nombre = ?, email = ?
+                WHERE dni = ?
+                """;
+
+        String sqlDireccion = """
+                UPDATE direccion
+                SET via = ?, numero = ?, cp = ?, localidad = ?
+                WHERE dni = ?
+                """;
+
+        boolean autoCommitOriginal = true;
+
+        try {
+            //desactivamos que cada operación en la base de datos se confirme automáticamente
+            autoCommitOriginal = conexion.getAutoCommit();
+            conexion.setAutoCommit(false);
+
+            try (PreparedStatement psUsuario = conexion.prepareStatement(sqlUsuario)) {
+                psUsuario.setString(1, usuario.getNombre());
+                psUsuario.setString(2, usuario.getEmail());
+                psUsuario.setString(3, usuario.getDni());
+
+                //Si no afecta a ningún registro no hace nada
+                if (psUsuario.executeUpdate() == 0) {
+                    conexion.rollback();
+                    return false;
+                }
+            }
+
+            Direccion direccion = usuario.getDireccion();
+
+            try (PreparedStatement psDireccion = conexion.prepareStatement(sqlDireccion)) {
+                psDireccion.setString(1, direccion.getVia());
+                psDireccion.setString(2, direccion.getNumero());
+                psDireccion.setString(3, direccion.getCp());
+                psDireccion.setString(4, direccion.getLocalidad());
+                psDireccion.setString(5, usuario.getDni());
+                psDireccion.executeUpdate();
+            }
+
+            //Si tiene éxito realiza el cambio
+            conexion.commit();
+            return true;
+
+        } catch (SQLException e) {
+            try {
+                //En caso de excepción deshace la operación, y en caso de mostrar error por el rollback lo captura
+                conexion.rollback();
+            } catch (SQLException rollbackException) {
+                e.addSuppressed(rollbackException);
+            }
+
+            if (e.getErrorCode() == 1062) {
+                throw new IllegalArgumentException("El email ya está en uso");
+            }
+
+            throw new RuntimeException("Error al modificar usuario.", e);
+        } finally {
+            try {
+                //Vuelve a realizar automaticamente las operaciones en la base de datos
+                conexion.setAutoCommit(autoCommitOriginal);
+            } catch (SQLException e) {
+                throw new RuntimeException("Error al restaurar la conexion.", e);
+            }
+        }
+    }
+
     public Usuario buscar(Usuario usuario) {
         if (usuario == null) {
             return null;

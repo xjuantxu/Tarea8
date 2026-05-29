@@ -44,6 +44,9 @@ public class Controlador {
     public boolean baja(Usuario usuario) {
         return modelo.bajaUsuario(usuario);
     }
+    public boolean modificar(Usuario usuario) {
+        return modelo.modificarUsuario(usuario);
+    }
     public Usuario buscar(Usuario usuario) {
         return modelo.buscarUsuario(usuario);
     }
@@ -62,6 +65,9 @@ public class Controlador {
     }
     public boolean baja(Libro libro) {
         return modelo.bajaLibro(libro);
+    }
+    public boolean modificar(Libro libro) {
+        return modelo.modificarLibro(libro);
     }
     public Libro buscar(Libro libro) {
         return modelo.buscarLibro(libro);

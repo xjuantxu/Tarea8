@@ -1,7 +1,8 @@
-package biblioteca.controllers;
+package biblioteca.vista.controllers;
 
 import biblioteca.controlador.Controlador;
 import biblioteca.modelo.Modelo;
+import biblioteca.modelo.negocio.Dialogos;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,7 +16,6 @@ public class ConexionController {
 
     private Controlador controlador;
 
-    // Se ejecuta al cargar la vista
     @FXML
     public void initialize() {
         Modelo modelo = new Modelo();
@@ -26,29 +26,14 @@ public class ConexionController {
     protected void onConectarButtonClick(ActionEvent event) {
         try {
             controlador.comenzar();
-            mostrarInfo("Conexion realizada correctamente");
+            Dialogos.mostrarDialogoInformacion("Información", "Conexión creada correctamente.");
             cambiarVista(event, "menu-view.fxml");
 
         } catch (Exception e) {
-            mostrarError(e.getMessage());
+            Dialogos.mostrarDialogoError("Error.",e.getMessage());
         }
     }
 
-    private void mostrarInfo(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Información");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
-    }
-
-    private void mostrarError(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
-    }
 
     private void cambiarVista(ActionEvent event, String fxml) {
 
@@ -59,6 +44,11 @@ public class ConexionController {
 
             Scene scene = new Scene(loader.load());
 
+            Object controller = loader.getController();
+            if (controller instanceof MenuController mc) {
+                mc.setControlador(controlador);
+            }
+
             Stage stage = (Stage) ((Node) event.getSource())
                     .getScene()
                     .getWindow();
@@ -67,7 +57,7 @@ public class ConexionController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            mostrarError("No se pudo cargar la vista");
+            Dialogos.mostrarDialogoError("Error.","No se pudo cargar la vista");
         }
     }
 }

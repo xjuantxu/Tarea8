@@ -1,47 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 
-<VBox prefHeight="300" prefWidth="480"
-      xmlns:fx="http://javafx.com/fxml/1"
-      xmlns="http://javafx.com/javafx/17.0.12"
-      fx:controller="biblioteca.controllers.MenuController">
-
-    <HBox alignment="TOP_CENTER" style="-fx-background-color: #2e7d32;" prefHeight="80">
-        <Label text="Gestión de bibliotecas"
-               style="-fx-text-fill: white;
-              -fx-font-size: 34px;
-              -fx-font-weight: bold;
-              -fx-letter-spacing: 1px;"/>
+<VBox prefHeight="300" prefWidth="480" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="biblioteca.vista.controllers.MenuController">
+    <MenuBar>
+        <menus>
+            <Menu mnemonicParsing="false" text="Archivo">
+                <items>
+                    <MenuItem mnemonicParsing="false" onAction="#onSalirClick" text="Salir" />
+                </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Ayuda">
+                <items>
+                    <MenuItem fx:id="menuAcercaDe" mnemonicParsing="false" onAction="#AcercaDeShow" text="Acerca de" />
+                </items>
+            </Menu>
+        </menus>
+    </MenuBar>
+    <HBox alignment="TOP_CENTER" prefHeight="80" style="-fx-background-color: #2e7d32;">
+        <Label alignment="CENTER" graphicTextGap="2.0" prefHeight="103.0" prefWidth="480.0" style="-fx-text-fill: white; -fx-font-size: 28; -fx-font-weight: bold; -fx-letter-spacing: 1px;" text="Sistema Integral Gestor de Bibliotecas" textAlignment="CENTER" wrapText="true" />
     </HBox>
 
-    <HBox spacing="20" VBox.vgrow="ALWAYS" alignment="CENTER">
+    <HBox alignment="CENTER" spacing="20" VBox.vgrow="ALWAYS">
 
         <VBox alignment="CENTER_LEFT" spacing="15">
-            <Button text="Libros" onAction="#onLibrosClick" prefWidth="200"/>
-            <Button text="Usuarios" onAction="#onUsuariosClick" prefWidth="200"/>
-            <Button text="Préstamos" onAction="#onPrestamosClick" prefWidth="200"/>
+            <Button onAction="#onLibrosClick" prefWidth="200" text="Libros" />
+            <Button onAction="#onUsuariosClick" prefWidth="200" text="Usuarios" />
+            <Button onAction="#onPrestamosClick" prefWidth="200" text="Préstamos" />
         </VBox>
 
-        <Region HBox.hgrow="ALWAYS"/>
+        <Region HBox.hgrow="ALWAYS" />
 
         <ImageView fitHeight="120" preserveRatio="true">
             <image>
-                <Image url="@/img/icon.png"/>
+                <Image url="@/img/icon.png" />
             </image>
         </ImageView>
 
     </HBox>
     <HBox alignment="BOTTOM_LEFT">
         <padding>
-            <Insets top="10" right="10" bottom="10" left="10"/>
+            <Insets bottom="10" left="10" right="10" top="10" />
         </padding>
 
-        <Button text="Salir" onAction="#onSalirClick" prefWidth="120"/>
+        <Button onAction="#onSalirClick" prefWidth="120" text="Salir" />
     </HBox>
-
 </VBox>

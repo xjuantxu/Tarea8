@@ -1,16 +1,21 @@
-package biblioteca.controllers;
+package biblioteca.vista.controllers;
 
 import biblioteca.controlador.Controlador;
+import biblioteca.modelo.negocio.Dialogos;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class MenuController {
 
+    public MenuItem menuAcercaDe;
     private Controlador controlador;
 
     public void setControlador(Controlador controlador) {
@@ -27,11 +32,11 @@ public class MenuController {
 
             Object controller = loader.getController();
 
-            if (controller instanceof LibrosController lc) {
+            if (controller instanceof LibrosController lc && controlador != null) {
                 lc.setControlador(controlador);
-            } else if (controller instanceof UsuariosController uc) {
+            } else if (controller instanceof UsuariosController uc && controlador != null) {
                 uc.setControlador(controlador);
-            } else if (controller instanceof PrestamosController pc) {
+            } else if (controller instanceof PrestamosController pc && controlador != null) {
                 pc.setControlador(controlador);
             }
 
@@ -59,6 +64,15 @@ public class MenuController {
     }
 
     public void onSalirClick(ActionEvent event) {
+        Stage stage = (Stage) ((javafx.scene.Node) event.getSource())
+                .getScene()
+                .getWindow();
+
+        boolean confirmarSalida = Dialogos.mostrarDialogoConfirmacion("Confirmar salida", "¿Desea salir de la aplicación?", stage);
+
+        if (!confirmarSalida) {
+            return;
+        }
 
         try {
             if (controlador != null) {
@@ -68,28 +82,24 @@ public class MenuController {
             e.printStackTrace();
         }
 
-        mostrarInfo("Conexión cerrada. Cerrando aplicación.");
-
-        Stage stage = (Stage) ((javafx.scene.Node) event.getSource())
-                .getScene()
-                .getWindow();
-
+        Dialogos.mostrarDialogoInformacion("Información", "Conexión cerrada. Cerrando aplicación.");
         stage.close();
     }
 
-    private void mostrarInfo(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Información");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
-    }
+    public void AcercaDeShow (ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/biblioteca/acercade-view.fxml")
+            );
 
-    private void mostrarError(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("Acerca de");
+            dialog.getDialogPane().setContent(loader.load());
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+            dialog.showAndWait();
+
+        } catch (IOException e) {
+            Dialogos.mostrarDialogoError("Error", "No se pudo cargar la ventana Acerca de.");
+        }
     }
 }

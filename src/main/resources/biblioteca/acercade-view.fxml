@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="213.0" prefWidth="559.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="395.0" layoutY="50.0" pickOnBounds="true" preserveRatio="true">
+          <image>
+              <Image url="@/img/icon.png" />
+          </image>
+      </ImageView>
+      <Label layoutX="37.0" layoutY="42.0" text="GestBiblio">
+         <font>
+            <Font name="System Bold" size="56.0" />
+         </font>
+      </Label>
+      <Label layoutX="48.0" layoutY="107.0" text="Sistema integral gestor de bibliotecas">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Label>
+      <Label layoutX="37.0" layoutY="183.0" text="© 2026 Juan Cruz García" />
+      <Label layoutX="307.0" layoutY="84.0" text="v0.1">
+         <font>
+            <Font size="30.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
