@@ -258,8 +258,7 @@ public class PrestamosController {
                 mc.setControlador(controlador);
             }
 
-            javafx.stage.Stage stage = (javafx.stage.Stage)
-                    ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            javafx.stage.Stage stage = (javafx.stage.Stage) tablaPrestamos.getScene().getWindow();
 
             stage.setScene(scene);
 

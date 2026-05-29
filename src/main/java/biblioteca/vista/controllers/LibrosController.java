@@ -244,8 +244,7 @@ public class LibrosController {
                 mc.setControlador(controlador);
             }
 
-            javafx.stage.Stage stage = (javafx.stage.Stage)
-                    ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            javafx.stage.Stage stage = (javafx.stage.Stage) tablaLibros.getScene().getWindow();
 
             stage.setScene(scene);
 
