@@ -1,14 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="biblioteca.vista.controllers.PrestamosController"
-            prefHeight="400.0" prefWidth="600.0">
-
+<AnchorPane prefHeight="684.0" prefWidth="746.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="biblioteca.vista.controllers.PrestamosController">
+    <children>
+        <MenuBar>
+            <menus>
+                <Menu mnemonicParsing="false" text="Archivo">
+                    <items>
+                        <MenuItem fx:id="menuVolver" mnemonicParsing="false" text="Volver" onAction="#onVolverClick" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Editar">
+                    <items>
+                        <MenuItem fx:id="menuDevolver" mnemonicParsing="false" onAction="#onDevolverClick" text="Devolver Préstamo" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Ayuda">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#AcercaDeShow" text="Acerca de" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <VBox alignment="CENTER" layoutY="25.0" prefHeight="79.0" prefWidth="746.0" style="-fx-background-color: #A1FFA7;">
+            <children>
+                <Label alignment="CENTER" style="-fx-text-fill: black; -fx-font-size: 28; -fx-font-weight: bold;" text="Listado de Libros" textAlignment="CENTER" />
+            </children></VBox>
+        <TableView fx:id="tablaPrestamos" layoutX="45.0" layoutY="207.0" prefHeight="392.0" prefWidth="657.0">
+            <contextMenu>
+                <ContextMenu>
+                    <items>
+                        <MenuItem fx:id="cxtDevolver" mnemonicParsing="false" onAction="#onDevolverClick" text="Devolver" />
+                    </items>
+                </ContextMenu>
+            </contextMenu>
+            <columns>
+                <TableColumn fx:id="colID" prefWidth="75.0" text="DNI" />
+                <TableColumn fx:id="colNombre" prefWidth="75.0" text="Nombre" />
+                <TableColumn fx:id="colISBN" prefWidth="75.0" text="ISBN" />
+                <TableColumn fx:id="colTitulo" prefWidth="75.0" text="Título" />
+                <TableColumn fx:id="colFechaInicio" prefWidth="75.0" text="Fecha de inicio" />
+                <TableColumn fx:id="colFechaFin" prefWidth="75.0" text="Fecha de devolución" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+        <Button fx:id="btnNuevo" layoutX="45.0" layoutY="618.0" mnemonicParsing="false" onAction="#onNuevoClick" prefHeight="40.0" prefWidth="108.0" text="Nuevo Préstamo" />
+        <Button layoutX="606.0" layoutY="618.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="96.0" text="Volver" fx:id="btnVolver" onAction="#onVolverClick" />
+        <Button fx:id="btnDevolver" layoutX="201.0" layoutY="618.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="121.0" text="Devolver Préstamo" onAction="#onDevolverClick" />
+        <TextField fx:id="txtBuscar" layoutX="478.0" layoutY="144.0" prefHeight="25.0" prefWidth="224.0" promptText="Introduce campo a buscar..." />
+        <Label layoutX="434.0" layoutY="148.0" text="Buscar:" />
+        <RadioButton fx:id="radioTodos" layoutX="50.0" layoutY="117.0" mnemonicParsing="false" text="Mostrar todos" />
+        <RadioButton fx:id="radioLibros" layoutX="50.0" layoutY="148.0" mnemonicParsing="false" text="Mostrar solo libros" />
+        <RadioButton fx:id="radioAudiolibros" layoutX="50.0" layoutY="178.0" mnemonicParsing="false" text="Mostrar solo audiolibros" />
+    </children>
 </AnchorPane>

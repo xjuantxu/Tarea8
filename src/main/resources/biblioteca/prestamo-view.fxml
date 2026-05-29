@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="456.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="biblioteca.vista.controllers.PrestamoController">
+   <children>
+      <TextField fx:id="txtID" layoutX="125.0" layoutY="36.0" promptText="12345678A" />
+      <Button fx:id="btnBuscarID" layoutX="300.0" layoutY="36.0" mnemonicParsing="false" onAction="#OnBuscarID" text="Buscar" />
+      <Button fx:id="btnBuscarISBN" layoutX="300.0" layoutY="87.0" mnemonicParsing="false" onAction="#OnBuscarISBN" text="Button" />
+      <Label layoutX="86.0" layoutY="40.0" text="DNI:" />
+      <Label layoutX="83.0" layoutY="91.0" text="ISBN:" />
+      <TextField fx:id="txtISBN" layoutX="125.0" layoutY="87.0" promptText="1234567891234" />
+      <Label layoutX="64.0" layoutY="165.0" text="DNI:" />
+      <Label layoutX="49.0" layoutY="192.0" text="Nombre:" />
+      <Label layoutX="60.0" layoutY="225.0" text="Email:" />
+      <Label layoutX="75.0" layoutY="255.0" text="Via:" />
+      <Label layoutX="47.0" layoutY="283.0" text="Número:" />
+      <Label layoutX="18.0" layoutY="312.0" text="Código Postal: " />
+      <Label layoutX="44.0" layoutY="341.0" text="Localidad:" />
+      <Label fx:id="lblID" layoutX="110.0" layoutY="165.0" text="Label" />
+      <Label fx:id="lblNombre" layoutX="110.0" layoutY="192.0" text="Label" />
+      <Label fx:id="lblEmail" layoutX="110.0" layoutY="225.0" text="Label" />
+      <Label fx:id="lblVia" layoutX="110.0" layoutY="255.0" text="Label" />
+      <Label fx:id="lblNumero" layoutX="110.0" layoutY="283.0" text="Label" />
+      <Label fx:id="lblCP" layoutX="110.0" layoutY="312.0" text="Label" />
+      <Label fx:id="lblLocalidad" layoutX="110.0" layoutY="341.0" text="Label" />
+      <Label layoutX="271.0" layoutY="202.0" text="ISBN:" />
+      <Label layoutX="269.0" layoutY="235.0" text="Título:" />
+      <Label layoutX="253.0" layoutY="265.0" text="Categoría:" />
+      <Label fx:id="lblISBN" layoutX="312.0" layoutY="202.0" text="Label" />
+      <Label fx:id="lblTitulo" layoutX="312.0" layoutY="235.0" text="Label" />
+      <Label fx:id="lblCategoria" layoutX="312.0" layoutY="265.0" text="Label" />
+   </children>
+</AnchorPane>

@@ -25,7 +25,7 @@
                 </Menu>
             </menus>
         </MenuBar>
-        <VBox alignment="CENTER" layoutY="25.0" prefHeight="79.0" prefWidth="746.0" style="-fx-background-color: #3B6A94;">
+        <VBox alignment="CENTER" layoutY="25.0" prefHeight="79.0" prefWidth="746.0" style="-fx-background-color: #FF7E63;">
             <children>
                 <Label alignment="CENTER" style="-fx-text-fill: white; -fx-font-size: 28; -fx-font-weight: bold;" text="Listado de Usuarios" textAlignment="CENTER" />
             </children></VBox>
