@@ -13,6 +13,12 @@
                     <MenuItem mnemonicParsing="false" onAction="#onSalirClick" text="Salir" />
                 </items>
             </Menu>
+         <Menu mnemonicParsing="false" text="Copia de seguridad">
+           <items>
+             <MenuItem fx:id="menuHacerCopia" mnemonicParsing="false" onAction="#onHacerCopia" text="Hacer copia de seguridad" />
+               <MenuItem fx:id="menuCargarCopia" mnemonicParsing="false" onAction="#OnCargarCopia" text="Cargar copia de seguridad" />
+           </items>
+         </Menu>
             <Menu mnemonicParsing="false" text="Ayuda">
                 <items>
                     <MenuItem fx:id="menuAcercaDe" mnemonicParsing="false" onAction="#AcercaDeShow" text="Acerca de" />

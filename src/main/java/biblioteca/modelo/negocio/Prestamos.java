@@ -1,9 +1,15 @@
 package biblioteca.modelo.negocio;
 
+import biblioteca.fichero.GestorBackup;
 import biblioteca.modelo.dominio.Libro;
 import biblioteca.modelo.dominio.Prestamo;
 import biblioteca.modelo.dominio.Usuario;
+import biblioteca.utilidades.UtilidadesXML;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -31,9 +37,11 @@ public class Prestamos {
 
     public void comenzar() {
         conexion = MySQL.getInstancia().getConexion();
+        leerXML();
     }
 
     public void terminar() {
+        escribirXML();
         conexion = null;
     }
 
@@ -118,6 +126,104 @@ public class Prestamos {
         return prestamos;
     }
 
+    // Convierte un nodo XML en un Prestamo.
+    public Prestamo elementToPrestamo(Element elemento) {
+        if (elemento == null) {
+            throw new IllegalArgumentException("El elemento prestamo no puede ser null");
+        }
+
+        String dni = obtenerTexto(elemento, "dni");
+        String isbn = obtenerTexto(elemento, "isbn");
+        LocalDate inicio = LocalDate.parse(obtenerTexto(elemento, "inicio"));
+
+        Usuario usuario = Usuarios.getInstancia().buscar(new Usuario(dni));
+        Libro libro = Libros.getInstancia().buscar(new Libro(isbn));
+
+        Prestamo prestamo = new Prestamo(libro, usuario, inicio);
+
+        boolean devuelto = Boolean.parseBoolean(obtenerTexto(elemento, "devuelto"));
+        String fin = obtenerTexto(elemento, "fin");
+
+        if (devuelto && !fin.isEmpty()) {
+            prestamo.devolver(LocalDate.parse(fin));
+        }
+
+        return prestamo;
+    }
+
+    // Lee el XML de prestamos e inserta cada prestamo en la base de datos.
+    public void leerXML() {
+        if (!GestorBackup.hayDirectorioActivo()) {
+            return;
+        }
+
+        String ruta = GestorBackup.getRutaPrestamos();
+        if (!new File(ruta).exists()) {
+            return;
+        }
+
+        Document dom = UtilidadesXML.xmlToDom(ruta);
+        NodeList nodosPrestamos = dom.getElementsByTagName("prestamo");
+
+        for (int i = 0; i < nodosPrestamos.getLength(); i++) {
+            Element elemento = (Element) nodosPrestamos.item(i);
+            Prestamo prestamo = elementToPrestamo(elemento);
+
+            if (!existe(prestamo)) {
+                insertarPrestamo(prestamo);
+            }
+        }
+    }
+
+    // Convierte un Prestamo en un nodo XML.
+    public Element prestamoToElement(Document dom, Prestamo prestamo) {
+        if (dom == null || prestamo == null) {
+            throw new IllegalArgumentException("El DOM y el prestamo no pueden ser null");
+        }
+
+        Element elementoPrestamo = dom.createElement("prestamo");
+
+        elementoPrestamo.appendChild(crearElementoTexto(dom, "dni", prestamo.getUsuario().getDni()));
+        elementoPrestamo.appendChild(crearElementoTexto(dom, "isbn", prestamo.getLibro().getISBN()));
+        elementoPrestamo.appendChild(crearElementoTexto(dom, "inicio", prestamo.getInicio().toString()));
+        elementoPrestamo.appendChild(crearElementoTexto(dom, "devuelto", String.valueOf(prestamo.isDevuelto())));
+        elementoPrestamo.appendChild(crearElementoTexto(
+                dom,
+                "fin",
+                prestamo.getFin() != null ? prestamo.getFin().toString() : ""
+        ));
+
+        return elementoPrestamo;
+    }
+
+    // Escribe todos los prestamos de la base de datos en el XML.
+    public void escribirXML() {
+        if (!GestorBackup.hayDirectorioActivo()) {
+            return;
+        }
+
+        Document dom = UtilidadesXML.crearDomVacio("prestamos");
+        Element raiz = dom.getDocumentElement();
+
+        for (Prestamo prestamo : todos()) {
+            raiz.appendChild(prestamoToElement(dom, prestamo));
+        }
+
+        UtilidadesXML.domToXml(dom, GestorBackup.getRutaPrestamos());
+    }
+
+    // Borra todos los prestamos de la base de datos.
+    public void borrarTodos() {
+        String sql = "DELETE FROM prestamo";
+
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al borrar prestamos.", e);
+        }
+    }
+
     private Prestamo crearPrestamo(ResultSet rs) throws SQLException {
         Usuario usuario = Usuarios.getInstancia().buscar(new Usuario(rs.getString("dni")));
         Libro libro = Libros.getInstancia().buscar(new Libro(rs.getString("isbn")));
@@ -129,5 +235,68 @@ public class Prestamos {
         }
 
         return prestamo;
+    }
+
+    // Inserta un prestamo desde el XML respetando si esta devuelto o pendiente.
+    private void insertarPrestamo(Prestamo prestamo) {
+        String sql = """
+                INSERT INTO prestamo (dni, isbn, fInicio, fLimite, devuelto, fDevolucion)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """;
+
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setString(1, prestamo.getUsuario().getDni());
+            ps.setString(2, prestamo.getLibro().getISBN());
+            ps.setDate(3, Date.valueOf(prestamo.getInicio()));
+            ps.setDate(4, Date.valueOf(prestamo.getInicio().plusDays(14)));
+            ps.setBoolean(5, prestamo.isDevuelto());
+            ps.setDate(6, prestamo.getFin() != null ? Date.valueOf(prestamo.getFin()) : null);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            if (e.getErrorCode() == 1062) {
+                return;
+            }
+
+            throw new RuntimeException("Error al insertar prestamo desde XML.", e);
+        }
+    }
+
+    // Comprueba si el prestamo ya existe en la base de datos.
+    private boolean existe(Prestamo prestamo) {
+        String sql = """
+                SELECT COUNT(*) AS total
+                FROM prestamo
+                WHERE dni = ? AND isbn = ? AND fInicio = ?
+                """;
+
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setString(1, prestamo.getUsuario().getDni());
+            ps.setString(2, prestamo.getLibro().getISBN());
+            ps.setDate(3, Date.valueOf(prestamo.getInicio()));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt("total") > 0;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al comprobar prestamo.", e);
+        }
+    }
+
+    // Crea un elemento XML con texto.
+    private Element crearElementoTexto(Document dom, String etiqueta, String texto) {
+        Element elemento = dom.createElement(etiqueta);
+        elemento.setTextContent(texto);
+        return elemento;
+    }
+
+    // Obtiene el texto de una etiqueta dentro de un elemento XML.
+    private String obtenerTexto(Element elemento, String etiqueta) {
+        NodeList nodos = elemento.getElementsByTagName(etiqueta);
+        if (nodos.getLength() == 0) {
+            return "";
+        }
+        return nodos.item(0).getTextContent();
     }
 }

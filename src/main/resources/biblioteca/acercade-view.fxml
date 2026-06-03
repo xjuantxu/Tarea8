@@ -23,7 +23,7 @@
          </font>
       </Label>
       <Label layoutX="37.0" layoutY="183.0" text="© 2026 Juan Cruz García" />
-      <Label layoutX="307.0" layoutY="84.0" text="v0.1">
+      <Label layoutX="307.0" layoutY="84.0" text="v0.2">
          <font>
             <Font size="30.0" />
          </font>

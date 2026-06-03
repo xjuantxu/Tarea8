@@ -1,10 +1,16 @@
 package biblioteca.modelo.negocio;
 
+import biblioteca.fichero.GestorBackup;
 import biblioteca.modelo.dominio.Autor;
 import biblioteca.modelo.dominio.Audiolibro;
 import biblioteca.modelo.dominio.Categoria;
 import biblioteca.modelo.dominio.Libro;
+import biblioteca.utilidades.UtilidadesXML;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,9 +37,11 @@ public class Libros {
 
     public void comenzar() {
         conexion = MySQL.getInstancia().getConexion();
+        leerXML();
     }
 
     public void terminar() {
+        escribirXML();
         conexion = null;
     }
 
@@ -199,6 +207,149 @@ public class Libros {
         return libros;
     }
 
+    // Convierte un nodo XML en un Libro o Audiolibro.
+    public Libro elementToLibro(Element elemento) {
+        if (elemento == null) {
+            throw new IllegalArgumentException("El elemento libro no puede ser null");
+        }
+
+        String tipo = elemento.getAttribute("tipo");
+        String isbn = obtenerTexto(elemento, "isbn");
+        String titulo = obtenerTexto(elemento, "titulo");
+        int anio = Integer.parseInt(obtenerTexto(elemento, "anio"));
+        Categoria categoria = Categoria.valueOf(obtenerTexto(elemento, "categoria"));
+
+        Libro libro;
+
+        if ("audiolibro".equals(tipo)) {
+            long duracionSegundos = Long.parseLong(obtenerTexto(elemento, "duracionSegundos"));
+            String formato = obtenerTexto(elemento, "formato");
+
+            libro = new Audiolibro(
+                    isbn,
+                    titulo,
+                    anio,
+                    categoria,
+                    Duration.ofSeconds(duracionSegundos),
+                    formato
+            );
+        } else {
+            libro = new Libro(isbn, titulo, anio, categoria);
+        }
+
+        NodeList nodosAutores = elemento.getElementsByTagName("autor");
+        for (int i = 0; i < nodosAutores.getLength(); i++) {
+            Element elementoAutor = (Element) nodosAutores.item(i);
+            Autor autor = new Autor(
+                    obtenerTexto(elementoAutor, "nombre"),
+                    obtenerTexto(elementoAutor, "apellidos"),
+                    obtenerTexto(elementoAutor, "nacionalidad")
+            );
+            libro.addAutor(autor);
+        }
+
+        return libro;
+    }
+
+    // Lee el XML de libros e inserta cada libro en la base de datos.
+    public void leerXML() {
+        if (!GestorBackup.hayDirectorioActivo()) {
+            return;
+        }
+
+        String ruta = GestorBackup.getRutaLibros();
+        if (!new File(ruta).exists()) {
+            return;
+        }
+
+        Document dom = UtilidadesXML.xmlToDom(ruta);
+        NodeList nodosLibros = dom.getDocumentElement().getChildNodes();
+
+        for (int i = 0; i < nodosLibros.getLength(); i++) {
+            if (nodosLibros.item(i) instanceof Element elemento) {
+                Libro libro = elementToLibro(elemento);
+
+                if (buscar(libro) == null) {
+                    alta(libro);
+                }
+            }
+        }
+    }
+
+    // Convierte un Libro o Audiolibro en un nodo XML.
+    public Element libroToElement(Document dom, Libro libro) {
+        if (dom == null || libro == null) {
+            throw new IllegalArgumentException("El DOM y el libro no pueden ser null");
+        }
+
+        Element elementoLibro = dom.createElement("libro");
+        elementoLibro.setAttribute("tipo", libro instanceof Audiolibro ? "audiolibro" : "libro");
+
+        elementoLibro.appendChild(crearElementoTexto(dom, "isbn", libro.getISBN()));
+        elementoLibro.appendChild(crearElementoTexto(dom, "titulo", libro.getTitulo()));
+        elementoLibro.appendChild(crearElementoTexto(dom, "anio", String.valueOf(libro.getAnio())));
+        elementoLibro.appendChild(crearElementoTexto(dom, "categoria", libro.getCategoria().name()));
+
+        if (libro instanceof Audiolibro audiolibro) {
+            elementoLibro.appendChild(crearElementoTexto(
+                    dom,
+                    "duracionSegundos",
+                    String.valueOf(audiolibro.getDuracion().getSeconds())
+            ));
+            elementoLibro.appendChild(crearElementoTexto(dom, "formato", audiolibro.getFormato()));
+        }
+
+        Element elementoAutores = dom.createElement("autores");
+        for (Autor autor : libro.getAutores()) {
+            if (autor != null) {
+                Element elementoAutor = dom.createElement("autor");
+                elementoAutor.appendChild(crearElementoTexto(dom, "nombre", autor.getNombre()));
+                elementoAutor.appendChild(crearElementoTexto(dom, "apellidos", autor.getApellidos()));
+                elementoAutor.appendChild(crearElementoTexto(dom, "nacionalidad", autor.getNacionalidad()));
+                elementoAutores.appendChild(elementoAutor);
+            }
+        }
+        elementoLibro.appendChild(elementoAutores);
+
+        return elementoLibro;
+    }
+
+    // Escribe todos los libros de la base de datos en el XML.
+    public void escribirXML() {
+        if (!GestorBackup.hayDirectorioActivo()) {
+            return;
+        }
+
+        Document dom = UtilidadesXML.crearDomVacio("libros");
+        Element raiz = dom.getDocumentElement();
+
+        for (Libro libro : todos()) {
+            raiz.appendChild(libroToElement(dom, libro));
+        }
+
+        UtilidadesXML.domToXml(dom, GestorBackup.getRutaLibros());
+    }
+
+    // Borra todos los libros de la base de datos.
+    public void borrarTodos() {
+        String sqlLibroAutor = "DELETE FROM libro_autor";
+        String sqlAudiolibro = "DELETE FROM audiolibro";
+        String sqlLibro = "DELETE FROM libro";
+
+        try (
+                PreparedStatement psLibroAutor = conexion.prepareStatement(sqlLibroAutor);
+                PreparedStatement psAudiolibro = conexion.prepareStatement(sqlAudiolibro);
+                PreparedStatement psLibro = conexion.prepareStatement(sqlLibro)
+        ) {
+            psLibroAutor.executeUpdate();
+            psAudiolibro.executeUpdate();
+            psLibro.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al borrar libros.", e);
+        }
+    }
+
     private Libro crearLibro(String isbn, String titulo, int anio, Categoria categoria) throws SQLException {
 
         String sql = """
@@ -359,5 +510,21 @@ public class Libros {
         } catch (SQLException e) {
             throw new RuntimeException("Error al relacionar libro y autor.", e);
         }
+    }
+
+    // Crea un elemento XML con texto.
+    private Element crearElementoTexto(Document dom, String etiqueta, String texto) {
+        Element elemento = dom.createElement(etiqueta);
+        elemento.setTextContent(texto);
+        return elemento;
+    }
+
+    // Obtiene el texto de una etiqueta dentro de un elemento XML.
+    private String obtenerTexto(Element elemento, String etiqueta) {
+        NodeList nodos = elemento.getElementsByTagName(etiqueta);
+        if (nodos.getLength() == 0) {
+            return "";
+        }
+        return nodos.item(0).getTextContent();
     }
 }
