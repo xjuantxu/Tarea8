@@ -2,10 +2,10 @@ package biblioteca.vista.controllers;
 
 import biblioteca.controlador.Controlador;
 import biblioteca.modelo.negocio.Dialogos;
+import biblioteca.modelo.negocio.recursos.LocalizadorRecursos;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.MenuItem;
@@ -13,23 +13,25 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+// Controlador del menu principal.
 public class MenuController {
 
     public MenuItem menuAcercaDe;
     private Controlador controlador;
 
     public void setControlador(Controlador controlador) {
+        // Recibe el controlador principal para usar la misma conexion.
         this.controlador = controlador;
     }
 
     private void cambiarVista(ActionEvent event, String fxml) {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/biblioteca/" + fxml)
-            );
+            // Carga la vista que se indique desde el menu.
+            FXMLLoader loader = new FXMLLoader(LocalizadorRecursos.class.getResource(fxml));
 
             Scene scene = new Scene(loader.load());
 
+            // Se pasa el controlador principal a la pantalla que se abre.
             Object controller = loader.getController();
 
             if (controller instanceof LibrosController lc && controlador != null) {
@@ -40,6 +42,7 @@ public class MenuController {
                 pc.setControlador(controlador);
             }
 
+            // Cogemos la ventana actual y cambiamos su escena.
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource())
                     .getScene()
                     .getWindow();
@@ -52,22 +55,27 @@ public class MenuController {
     }
 
     public void onLibrosClick(ActionEvent event) {
-        cambiarVista(event, "libros-view.fxml");
+        // Abre la pantalla de libros.
+        cambiarVista(event, "/biblioteca/libros-view.fxml");
     }
 
     public void onUsuariosClick(ActionEvent event) {
-        cambiarVista(event, "usuarios-view.fxml");
+        // Abre la pantalla de usuarios.
+        cambiarVista(event, "/biblioteca/usuarios-view.fxml");
     }
 
     public void onPrestamosClick(ActionEvent event) {
-        cambiarVista(event, "prestamos-view.fxml");
+        // Abre la pantalla de prestamos.
+        cambiarVista(event, "/biblioteca/prestamos-view.fxml");
     }
 
     public void onSalirClick(ActionEvent event) {
+        // Se obtiene la ventana para poder cerrarla despues.
         Stage stage = (Stage) ((javafx.scene.Node) event.getSource())
                 .getScene()
                 .getWindow();
 
+        // Antes de salir se pide confirmacion.
         boolean confirmarSalida = Dialogos.mostrarDialogoConfirmacion("Confirmar salida", "¿Desea salir de la aplicación?", stage);
 
         if (!confirmarSalida) {
@@ -75,6 +83,7 @@ public class MenuController {
         }
 
         try {
+            // Si hay conexion abierta, se cierra.
             if (controlador != null) {
                 controlador.terminar();
             }
@@ -86,11 +95,10 @@ public class MenuController {
         stage.close();
     }
 
-    public void AcercaDeShow (ActionEvent event) {
+    public void AcercaDeShow () {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/biblioteca/acercade-view.fxml")
-            );
+            // Muestra la ventana de informacion de la aplicacion.
+            FXMLLoader loader = new FXMLLoader(LocalizadorRecursos.class.getResource("/biblioteca/acercade-view.fxml"));
 
             Dialog<Void> dialog = new Dialog<>();
             dialog.setTitle("Acerca de");

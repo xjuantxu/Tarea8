@@ -3,7 +3,6 @@ package biblioteca.vista.controllers;
 import biblioteca.modelo.dominio.*;
 import biblioteca.modelo.negocio.Dialogos;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -11,6 +10,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+// Controlador del formulario de libro.
 public class LibroController {
 
     @FXML
@@ -44,12 +44,17 @@ public class LibroController {
 
     @FXML
     public void initialize() {
+        // Se cargan las opciones iniciales de los combos.
         cmbCategoria.setItems(FXCollections.observableArrayList(Categoria.values()));
         cmbCategoria.getSelectionModel().selectFirst();
         cmbTipo.setItems(FXCollections.observableArrayList("Libro", "Audiolibro"));
         cmbTipo.getSelectionModel().selectFirst();
+
+        // Se preparan los campos especiales de audiolibro.
         actualizarCamposAudiolibro();
         cmbTipo.valueProperty().addListener((observable, anterior, seleccionado) -> actualizarCamposAudiolibro());
+
+        // Se prepara la lista de autores.
         listaAutores.setItems(FXCollections.observableArrayList(autores));
         listaAutores.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         btnDeleteAutor.setDisable(true);
@@ -61,11 +66,13 @@ public class LibroController {
     @FXML
     private void onAddAutor() {
 
+        // Como maximo se permiten 3 autores.
         if (autores.size() >= 3) {
             Dialogos.mostrarDialogoError("Error","No se pueden añadir más de 3 autores");
             return;
         }
 
+        // Los datos del autor son obligatorios.
         if (txtNombreAutor.getText().isBlank() ||
                 txtApellidosAutor.getText().isBlank() ||
                 txtNacionalidadAutor.getText().isBlank()) {
@@ -83,6 +90,7 @@ public class LibroController {
         autores.add(autor);
         listaAutores.getItems().add(autor);
 
+        // Se actualiza la lista y se limpian los campos.
         listaAutores.setItems(
                 FXCollections.observableArrayList(autores)
         );
@@ -93,6 +101,7 @@ public class LibroController {
     }
 
     private void actualizarCamposAudiolibro() {
+        // Si es libro normal, no se usan formato ni duracion.
         boolean esLibro = "Libro".equals(cmbTipo.getValue());
         txtFormato.setDisable(esLibro);
         txtDuracion.setDisable(esLibro);
@@ -108,12 +117,14 @@ public class LibroController {
             return;
         }
 
+        // Rellena el formulario con los datos de un libro existente.
         txtISBN.setText(libro.getISBN());
         txtISBN.setDisable(true);
         txtTitulo.setText(libro.getTitulo());
         txtAnio.setText(String.valueOf(libro.getAnio()));
         cmbCategoria.setValue(libro.getCategoria());
 
+        // Si es audiolibro tambien se rellenan sus campos propios.
         if (libro instanceof Audiolibro audiolibro) {
             cmbTipo.setValue("Audiolibro");
             txtFormato.setText(audiolibro.getFormato());
@@ -122,6 +133,7 @@ public class LibroController {
             cmbTipo.setValue("Libro");
         }
 
+        // Se cargan los autores del libro en la lista.
         autores.clear();
         for (Autor autor : libro.getAutores()) {
             if (autor != null) {
@@ -132,6 +144,7 @@ public class LibroController {
     }
     public Libro getLibro() {
 
+        // Se recogen los datos escritos en el formulario.
         String isbn = txtISBN.getText();
         String titulo = txtTitulo.getText();
         int anio = Integer.parseInt(txtAnio.getText());
@@ -139,6 +152,7 @@ public class LibroController {
 
         Libro libro;
 
+        // Segun el tipo seleccionado se crea un libro o un audiolibro.
         if ("Audiolibro".equals(cmbTipo.getValue())) {
 
             long segundos = Long.parseLong(txtDuracion.getText());
@@ -156,6 +170,7 @@ public class LibroController {
             libro = new Libro(isbn, titulo, anio, categoria);
         }
 
+        // Se añaden los autores al libro creado.
         for (Autor a : autores) {
             libro.addAutor(a);
         }
@@ -164,7 +179,8 @@ public class LibroController {
     }
 
     @FXML
-    private void onDeleteAutor(ActionEvent actionEvent) {
+    private void onDeleteAutor() {
+        // Se elimina el autor seleccionado en la lista.
         Autor autorSeleccionado = listaAutores.getSelectionModel().getSelectedItem();
 
         if (autorSeleccionado == null) {

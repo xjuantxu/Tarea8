@@ -128,76 +128,6 @@ public class Libros {
         }
     }
 
-    public boolean modificar(Libro libro) {
-
-        if (libro == null) {
-            return false;
-        }
-
-        String sqlLibro = """
-            UPDATE libro
-            SET titulo = ?, anio = ?, categoria = ?
-            WHERE isbn = ?
-            """;
-
-        boolean autoCommitOriginal = true;
-
-        try {
-            //desactivamos que cada operación en la base de datos se confirme automáticamente
-            autoCommitOriginal = conexion.getAutoCommit();
-            conexion.setAutoCommit(false);
-
-            try (PreparedStatement psLibro = conexion.prepareStatement(sqlLibro)) {
-                psLibro.setString(1, libro.getTitulo());
-                psLibro.setInt(2, libro.getAnio());
-                psLibro.setString(3, libro.getCategoria().name());
-                psLibro.setString(4, libro.getISBN());
-
-                //Si no afecta a ningún registro no hace nada
-                if (psLibro.executeUpdate() == 0) {
-                    conexion.rollback();
-                    return false;
-                }
-            }
-
-            borrarAudiolibro(libro.getISBN());
-
-            if (libro instanceof Audiolibro audiolibro) {
-                insertarAudiolibro(audiolibro);
-            }
-
-            borrarAutoresLibro(libro.getISBN());
-
-            for (Autor autor : libro.getAutores()) {
-                if (autor != null) {
-                    int idAutor = obtenerOCrearIdAutor(autor);
-                    insertarLibroAutor(libro.getISBN(), idAutor);
-                }
-            }
-
-            //Si tiene éxito realiza el cambio
-            conexion.commit();
-            return true;
-
-        } catch (Exception e) {
-            try {
-                //En caso de excepción deshace la operación, y en caso de mostrar error por el rollback lo captura
-                conexion.rollback();
-            } catch (SQLException rollbackException) {
-                e.addSuppressed(rollbackException);
-            }
-
-            throw new RuntimeException("Error al modificar libro.", e);
-        } finally {
-            try {
-                //Vuelve a realizar automaticamente las operaciones en la base de datos
-                conexion.setAutoCommit(autoCommitOriginal);
-            } catch (SQLException e) {
-                throw new RuntimeException("Error al restaurar la conexion.", e);
-            }
-        }
-    }
-
     public Libro buscar(Libro libro) {
         if (libro == null) {
             return null;
@@ -428,38 +358,6 @@ public class Libros {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error al relacionar libro y autor.", e);
-        }
-    }
-
-    private void insertarAudiolibro(Audiolibro audiolibro) throws SQLException {
-        String sql = """
-            INSERT INTO audiolibro (isbn, duracion_segundos, formato)
-            VALUES (?, ?, ?)
-            """;
-
-        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, audiolibro.getISBN());
-            ps.setLong(2, audiolibro.getDuracion().getSeconds());
-            ps.setString(3, audiolibro.getFormato());
-            ps.executeUpdate();
-        }
-    }
-
-    private void borrarAudiolibro(String isbn) throws SQLException {
-        String sql = "DELETE FROM audiolibro WHERE isbn = ?";
-
-        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, isbn);
-            ps.executeUpdate();
-        }
-    }
-
-    private void borrarAutoresLibro(String isbn) throws SQLException {
-        String sql = "DELETE FROM libro_autor WHERE isbn = ?";
-
-        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, isbn);
-            ps.executeUpdate();
         }
     }
 }

@@ -5,9 +5,9 @@ import biblioteca.modelo.Modelo;
 import biblioteca.modelo.dominio.Direccion;
 import biblioteca.modelo.dominio.Usuario;
 import biblioteca.modelo.negocio.Dialogos;
+import biblioteca.modelo.negocio.recursos.LocalizadorRecursos;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -16,16 +16,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import java.io.IOException;
 import java.util.List;
 
+// Controlador de la pantalla donde se muestran los usuarios.
 public class UsuariosController {
 
-    @FXML
-    public MenuItem menuEditar;
-    @FXML
     public MenuItem menuEliminar;
     @FXML
     public MenuItem menuVolver;
-    @FXML
-    public MenuItem cxtEditar;
     @FXML
     public MenuItem cxtEliminar;
     @FXML
@@ -56,12 +52,14 @@ public class UsuariosController {
             return;
         }
 
+        // Recibe el controlador principal y carga los usuarios.
         this.controlador = controlador;
         cargarUsuarios();
     }
 
     @FXML
     public void initialize() {
+        // Se configuran las columnas de la tabla.
         colID.setCellValueFactory(new PropertyValueFactory<>("dni"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
@@ -71,6 +69,7 @@ public class UsuariosController {
         colLocalidad.setCellValueFactory(cellData -> new SimpleStringProperty(getLocalidad(cellData.getValue())));
 
         if (controlador == null) {
+            // Si no recibe controlador, crea uno propio.
             Modelo modelo = new Modelo();
             controlador = new Controlador(modelo);
             controlador.comenzar();
@@ -82,6 +81,7 @@ public class UsuariosController {
     }
 
     private void cargarUsuarios() {
+        // Se cargan los usuarios desde el controlador y se aplica la busqueda actual.
         usuarios = controlador.listadoUsuarios();
         aplicarFiltro();
     }
@@ -92,6 +92,7 @@ public class UsuariosController {
             return;
         }
 
+        // Filtra los usuarios segun el texto de busqueda.
         List<Usuario> usuariosFiltrados = usuarios.stream()
                 .filter(this::cumpleBusqueda)
                 .toList();
@@ -100,6 +101,7 @@ public class UsuariosController {
     }
 
     private boolean cumpleBusqueda(Usuario usuario) {
+        // Comprueba si el texto buscado aparece en algun dato del usuario.
         String texto = txtBuscar.getText();
 
         if (texto == null || texto.isBlank()) {
@@ -122,87 +124,31 @@ public class UsuariosController {
     }
 
     private String getVia(Usuario usuario) {
+        // Devuelve la via o texto vacio si no hay direccion.
         Direccion direccion = usuario.getDireccion();
         return direccion != null ? direccion.getVia() : "";
     }
 
     private String getNumero(Usuario usuario) {
+        // Devuelve el numero o texto vacio si no hay direccion.
         Direccion direccion = usuario.getDireccion();
         return direccion != null ? direccion.getNumero() : "";
     }
 
     private String getCp(Usuario usuario) {
+        // Devuelve el codigo postal o texto vacio si no hay direccion.
         Direccion direccion = usuario.getDireccion();
         return direccion != null ? direccion.getCp() : "";
     }
 
     private String getLocalidad(Usuario usuario) {
+        // Devuelve la localidad o texto vacio si no hay direccion.
         Direccion direccion = usuario.getDireccion();
         return direccion != null ? direccion.getLocalidad() : "";
     }
 
-
-    public void onEditarClick(ActionEvent actionEvent) {
-        Usuario usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
-
-        if (usuarioSeleccionado == null) {
-            Dialogos.mostrarDialogoError("Error", "Debe seleccionar un usuario para editar.");
-            return;
-        }
-
-        seleccionarUsuario(usuarioSeleccionado);
-
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/biblioteca/usuario-view.fxml")
-            );
-
-            Dialog<Usuario> dialog = new Dialog<>();
-            dialog.setTitle("Editar Usuario");
-            dialog.getDialogPane().setContent(loader.load());
-
-            ButtonType btnOk = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE);
-            dialog.getDialogPane().getButtonTypes().addAll(btnOk, ButtonType.CANCEL);
-
-            UsuarioController controller = loader.getController();
-            controller.setUsuario(usuarioSeleccionado);
-
-            dialog.setResultConverter(button -> {
-                if (button == btnOk) {
-                    boolean confirmado = Dialogos.mostrarDialogoConfirmacion(
-                            "Confirmar edicion",
-                            "�Desea guardar los cambios del usuario?",
-                            null
-                    );
-
-                    if (!confirmado) {
-                        return null;
-                    }
-
-                    return controller.getUsuario();
-                }
-                return null;
-            });
-
-            dialog.showAndWait().ifPresent(usuario -> {
-                try {
-                    if (controlador.modificar(usuario)) {
-                        cargarUsuarios();
-                        mostrarUsuarioEnTabla(usuario);
-                    } else {
-                        Dialogos.mostrarDialogoAdvertencia("Aviso", "No se pudo modificar el usuario.");
-                    }
-                } catch (Exception e) {
-                    Dialogos.mostrarDialogoError("Error al modificar", e.getMessage());
-                }
-            });
-
-        } catch (Exception e) {
-            Dialogos.mostrarDialogoError("Error al modificar", e.getMessage());
-        }
-    }
-
-    public void onEliminarClick(ActionEvent actionEvent) {
+    public void onEliminarClick() {
+        // Se elimina el usuario seleccionado despues de confirmar.
         Usuario usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
 
         if (usuarioSeleccionado == null) {
@@ -231,11 +177,10 @@ public class UsuariosController {
         }
     }
 
-    public void onNuevoClick(ActionEvent actionEvent) {
+    public void onNuevoClick() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/biblioteca/usuario-view.fxml")
-            );
+            // Se abre el formulario para crear un nuevo usuario.
+            FXMLLoader loader = new FXMLLoader(LocalizadorRecursos.class.getResource("/biblioteca/usuario-view.fxml"));
 
             Dialog<Usuario> dialog = new Dialog<>();
             dialog.setTitle("Nuevo Usuario");
@@ -248,9 +193,10 @@ public class UsuariosController {
 
             dialog.setResultConverter(button -> {
                 if (button == btnOk) {
+                    // Antes de crear el usuario se pide confirmacion.
                     boolean confirmado = Dialogos.mostrarDialogoConfirmacion(
                             "Confirmar alta",
-                            "�Desea crear el usuario?",
+                            "¿Desea crear el usuario?",
                             null
                     );
 
@@ -265,6 +211,7 @@ public class UsuariosController {
 
             dialog.showAndWait().ifPresent(usuario -> {
                 try {
+                    // Si se crea correctamente, se recarga la tabla.
                     if (controlador.alta(usuario)) {
                         cargarUsuarios();
                         mostrarUsuarioEnTabla(usuario);
@@ -282,6 +229,7 @@ public class UsuariosController {
     }
 
     private void mostrarUsuarioEnTabla(Usuario usuario) {
+        // Intenta dejar seleccionado el usuario que se acaba de crear.
         seleccionarUsuario(usuario);
 
         if (tablaUsuarios.getSelectionModel().isEmpty()) {
@@ -292,6 +240,7 @@ public class UsuariosController {
         tablaUsuarios.refresh();
     }
     private void seleccionarUsuario(Usuario usuario) {
+        // Busca el usuario por DNI dentro de la tabla y lo selecciona.
         tablaUsuarios.getSelectionModel().clearSelection();
 
         for (Usuario usuarioTabla : tablaUsuarios.getItems()) {
@@ -306,19 +255,20 @@ public class UsuariosController {
     }
 
     @FXML
-    private void onVolverClick(javafx.event.ActionEvent event) {
+    private void onVolverClick() {
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
-                    getClass().getResource("/biblioteca/menu-view.fxml")
-            );
+            // Volvemos al menu principal manteniendo el mismo controlador.
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(LocalizadorRecursos.class.getResource("/biblioteca/menu-view.fxml"));
 
             javafx.scene.Scene scene = new javafx.scene.Scene(loader.load());
 
+            // Obtenemos el controlador del menu para pasarle la conexion.
             Object controller = loader.getController();
             if (controller instanceof MenuController mc) {
                 mc.setControlador(controlador);
             }
 
+            // Cogemos la ventana actual y cambiamos su escena por la del menu.
             javafx.stage.Stage stage = (javafx.stage.Stage) tablaUsuarios.getScene().getWindow();
 
             stage.setScene(scene);
@@ -328,11 +278,10 @@ public class UsuariosController {
         }
     }
 
-    public void AcercaDeShow (ActionEvent event) {
+    public void AcercaDeShow () {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/biblioteca/acercade-view.fxml")
-            );
+            // Muestra la ventana de informacion de la aplicacion.
+            FXMLLoader loader = new FXMLLoader(LocalizadorRecursos.class.getResource("/biblioteca/acercade-view.fxml"));
 
             Dialog<Void> dialog = new Dialog<>();
             dialog.setTitle("Acerca de");

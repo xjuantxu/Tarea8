@@ -37,16 +37,13 @@
                 </ContextMenu>
             </contextMenu>
             <columns>
-                <TableColumn fx:id="colID" prefWidth="75.0" text="DNI" />
-                <TableColumn fx:id="colNombre" prefWidth="75.0" text="Nombre" />
-                <TableColumn fx:id="colISBN" prefWidth="75.0" text="ISBN" />
-                <TableColumn fx:id="colTitulo" prefWidth="75.0" text="Título" />
-                <TableColumn fx:id="colFechaInicio" prefWidth="75.0" text="Fecha de inicio" />
-                <TableColumn fx:id="colFechaFin" prefWidth="75.0" text="Fecha de devolución" />
+                <TableColumn fx:id="colID" prefWidth="110.0" text="DNI" />
+                <TableColumn fx:id="colNombre" prefWidth="170.0" text="Nombre" />
+                <TableColumn fx:id="colISBN" prefWidth="130.0" text="ISBN" />
+                <TableColumn fx:id="colTitulo" prefWidth="220.0" text="Título" />
+                <TableColumn fx:id="colFechaInicio" prefWidth="135.0" text="Fecha de inicio" />
+                <TableColumn fx:id="colFechaFin" prefWidth="150.0" text="Fecha de devolución" />
             </columns>
-            <columnResizePolicy>
-                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-            </columnResizePolicy>
         </TableView>
         <Button fx:id="btnNuevo" layoutX="45.0" layoutY="618.0" mnemonicParsing="false" onAction="#onNuevoClick" prefHeight="40.0" prefWidth="108.0" text="Nuevo Préstamo" />
         <Button layoutX="606.0" layoutY="618.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="96.0" text="Volver" fx:id="btnVolver" onAction="#onVolverClick" />

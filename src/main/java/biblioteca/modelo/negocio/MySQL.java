@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+// Clase para gestionar la conexion con MySQL.
 public class MySQL {
 
     public static final String Host = "localhost";
@@ -15,10 +16,12 @@ public class MySQL {
     private Connection conexion;
 
     private MySQL() {
+        // Al crear la instancia se abre la conexion.
         establecerConexion();
     }
 
     public static MySQL getInstancia() {
+        // Se usa una unica instancia para toda la aplicacion.
         if (instancia == null) {
             instancia = new MySQL();
         }
@@ -27,6 +30,7 @@ public class MySQL {
 
     private void establecerConexion() {
         try {
+            // URL de conexion a la base de datos.
             String url = "jdbc:mysql://" + Host + "/" + Esquema +"?useSSL=false&allowPublicKeyRetrieval=true";
 
             conexion = DriverManager.getConnection(url, Usuario, Pass);
@@ -37,11 +41,13 @@ public class MySQL {
     }
 
     public Connection getConexion() {
+        // Devuelve la conexion para hacer consultas.
         return conexion;
     }
 
     public void cerrarConexion() {
         try {
+            // Si la conexion esta abierta, se cierra.
             if (conexion != null && !conexion.isClosed()) {
                 conexion.close();
             }

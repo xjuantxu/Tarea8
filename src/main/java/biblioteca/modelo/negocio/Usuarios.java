@@ -1,8 +1,14 @@
 package biblioteca.modelo.negocio;
 
+import biblioteca.fichero.GestorBackup;
 import biblioteca.modelo.dominio.Direccion;
 import biblioteca.modelo.dominio.Usuario;
+import biblioteca.utilidades.UtilidadesXML;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,9 +33,11 @@ public class Usuarios {
 
     public void comenzar() {
         conexion = MySQL.getInstancia().getConexion();
+        leerXML();
     }
 
     public void terminar() {
+        escribirXML();
         conexion = null;
     }
 
@@ -111,81 +119,6 @@ public class Usuarios {
         }
     }
 
-    public boolean modificar(Usuario usuario) {
-
-        if (usuario == null) {
-            return false;
-        }
-
-        String sqlUsuario = """
-                UPDATE usuario
-                SET nombre = ?, email = ?
-                WHERE dni = ?
-                """;
-
-        String sqlDireccion = """
-                UPDATE direccion
-                SET via = ?, numero = ?, cp = ?, localidad = ?
-                WHERE dni = ?
-                """;
-
-        boolean autoCommitOriginal = true;
-
-        try {
-            //desactivamos que cada operación en la base de datos se confirme automáticamente
-            autoCommitOriginal = conexion.getAutoCommit();
-            conexion.setAutoCommit(false);
-
-            try (PreparedStatement psUsuario = conexion.prepareStatement(sqlUsuario)) {
-                psUsuario.setString(1, usuario.getNombre());
-                psUsuario.setString(2, usuario.getEmail());
-                psUsuario.setString(3, usuario.getDni());
-
-                //Si no afecta a ningún registro no hace nada
-                if (psUsuario.executeUpdate() == 0) {
-                    conexion.rollback();
-                    return false;
-                }
-            }
-
-            Direccion direccion = usuario.getDireccion();
-
-            try (PreparedStatement psDireccion = conexion.prepareStatement(sqlDireccion)) {
-                psDireccion.setString(1, direccion.getVia());
-                psDireccion.setString(2, direccion.getNumero());
-                psDireccion.setString(3, direccion.getCp());
-                psDireccion.setString(4, direccion.getLocalidad());
-                psDireccion.setString(5, usuario.getDni());
-                psDireccion.executeUpdate();
-            }
-
-            //Si tiene éxito realiza el cambio
-            conexion.commit();
-            return true;
-
-        } catch (SQLException e) {
-            try {
-                //En caso de excepción deshace la operación, y en caso de mostrar error por el rollback lo captura
-                conexion.rollback();
-            } catch (SQLException rollbackException) {
-                e.addSuppressed(rollbackException);
-            }
-
-            if (e.getErrorCode() == 1062) {
-                throw new IllegalArgumentException("El email ya está en uso");
-            }
-
-            throw new RuntimeException("Error al modificar usuario.", e);
-        } finally {
-            try {
-                //Vuelve a realizar automaticamente las operaciones en la base de datos
-                conexion.setAutoCommit(autoCommitOriginal);
-            } catch (SQLException e) {
-                throw new RuntimeException("Error al restaurar la conexion.", e);
-            }
-        }
-    }
-
     public Usuario buscar(Usuario usuario) {
         if (usuario == null) {
             return null;
@@ -237,6 +170,115 @@ public class Usuarios {
         return usuarios;
     }
 
+    // Convierte un nodo XML en un objeto Usuario.
+    public Usuario elementToUsuario(Element elemento) {
+        if (elemento == null) {
+            throw new IllegalArgumentException("El elemento usuario no puede ser null");
+        }
+
+        String dni = elemento.getAttribute("dni");
+        String nombre = obtenerTexto(elemento, "nombre");
+        String email = obtenerTexto(elemento, "email");
+
+        Usuario usuario = new Usuario(dni, nombre);
+        usuario.setEmail(email);
+
+        Element elementoDireccion = (Element) elemento.getElementsByTagName("direccion").item(0);
+        if (elementoDireccion != null) {
+            Direccion direccion = new Direccion(
+                    obtenerTexto(elementoDireccion, "via"),
+                    obtenerTexto(elementoDireccion, "numero"),
+                    obtenerTexto(elementoDireccion, "cp"),
+                    obtenerTexto(elementoDireccion, "localidad")
+            );
+            usuario.setDireccion(direccion);
+        }
+
+        return usuario;
+    }
+
+    // Lee el XML de usuarios e inserta cada usuario en la base de datos.
+    public void leerXML() {
+        if (!GestorBackup.hayDirectorioActivo()) {
+            return;
+        }
+
+        String ruta = GestorBackup.getRutaUsuarios();
+        if (!new File(ruta).exists()) {
+            return;
+        }
+
+        Document dom = UtilidadesXML.xmlToDom(ruta);
+        NodeList nodosUsuarios = dom.getElementsByTagName("usuario");
+
+        for (int i = 0; i < nodosUsuarios.getLength(); i++) {
+            Element elemento = (Element) nodosUsuarios.item(i);
+            Usuario usuario = elementToUsuario(elemento);
+
+            if (buscar(usuario) == null) {
+                alta(usuario);
+            }
+        }
+    }
+
+    // Convierte un Usuario en un nodo XML.
+    public Element usuarioToElement(Document dom, Usuario usuario) {
+        if (dom == null || usuario == null) {
+            throw new IllegalArgumentException("El DOM y el usuario no pueden ser null");
+        }
+
+        Element elementoUsuario = dom.createElement("usuario");
+        elementoUsuario.setAttribute("dni", usuario.getDni());
+
+        elementoUsuario.appendChild(crearElementoTexto(dom, "nombre", usuario.getNombre()));
+        elementoUsuario.appendChild(crearElementoTexto(dom, "email", usuario.getEmail()));
+
+        Direccion direccion = usuario.getDireccion();
+        if (direccion != null) {
+            Element elementoDireccion = dom.createElement("direccion");
+            elementoDireccion.appendChild(crearElementoTexto(dom, "via", direccion.getVia()));
+            elementoDireccion.appendChild(crearElementoTexto(dom, "numero", direccion.getNumero()));
+            elementoDireccion.appendChild(crearElementoTexto(dom, "cp", direccion.getCp()));
+            elementoDireccion.appendChild(crearElementoTexto(dom, "localidad", direccion.getLocalidad()));
+            elementoUsuario.appendChild(elementoDireccion);
+        }
+
+        return elementoUsuario;
+    }
+
+    // Escribe todos los usuarios de la base de datos en el XML.
+    public void escribirXML() {
+        if (!GestorBackup.hayDirectorioActivo()) {
+            return;
+        }
+
+        Document dom = UtilidadesXML.crearDomVacio("usuarios");
+        Element raiz = dom.getDocumentElement();
+
+        for (Usuario usuario : todos()) {
+            raiz.appendChild(usuarioToElement(dom, usuario));
+        }
+
+        UtilidadesXML.domToXml(dom, GestorBackup.getRutaUsuarios());
+    }
+
+    // Borra todos los usuarios de la base de datos.
+    public void borrarTodos() {
+        String sqlDireccion = "DELETE FROM direccion";
+        String sqlUsuario = "DELETE FROM usuario";
+
+        try (
+                PreparedStatement psDireccion = conexion.prepareStatement(sqlDireccion);
+                PreparedStatement psUsuario = conexion.prepareStatement(sqlUsuario)
+        ) {
+            psDireccion.executeUpdate();
+            psUsuario.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al borrar usuarios.", e);
+        }
+    }
+
     private Usuario crearUsuario(ResultSet rs) throws SQLException {
         Usuario usuario = new Usuario(rs.getString("dni"), rs.getString("nombre"));
 
@@ -246,5 +288,21 @@ public class Usuarios {
 
         usuario.setDireccion(direccion);
         return usuario;
+    }
+
+    // Crea un elemento XML con texto.
+    private Element crearElementoTexto(Document dom, String etiqueta, String texto) {
+        Element elemento = dom.createElement(etiqueta);
+        elemento.setTextContent(texto);
+        return elemento;
+    }
+
+    // Obtiene el texto de una etiqueta dentro de un elemento XML.
+    private String obtenerTexto(Element elemento, String etiqueta) {
+        NodeList nodos = elemento.getElementsByTagName(etiqueta);
+        if (nodos.getLength() == 0) {
+            return "";
+        }
+        return nodos.item(0).getTextContent();
     }
 }

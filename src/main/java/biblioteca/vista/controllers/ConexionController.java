@@ -3,21 +3,22 @@ package biblioteca.vista.controllers;
 import biblioteca.controlador.Controlador;
 import biblioteca.modelo.Modelo;
 import biblioteca.modelo.negocio.Dialogos;
+import biblioteca.modelo.negocio.recursos.LocalizadorRecursos;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.IOException;
-import javafx.scene.control.Alert;
 
+// Controlador de la pantalla de conexion a la base de datos.
 public class ConexionController {
 
     private Controlador controlador;
 
     @FXML
     public void initialize() {
+        // Se prepara el controlador principal antes de conectar.
         Modelo modelo = new Modelo();
         controlador = new Controlador(modelo);
     }
@@ -25,39 +26,29 @@ public class ConexionController {
     @FXML
     protected void onConectarButtonClick(ActionEvent event) {
         try {
+            // Si la conexion funciona, pasamos al menu principal.
             controlador.comenzar();
             Dialogos.mostrarDialogoInformacion("Información", "Conexión creada correctamente.");
-            cambiarVista(event, "menu-view.fxml");
 
-        } catch (Exception e) {
-            Dialogos.mostrarDialogoError("Error.",e.getMessage());
-        }
-    }
-
-
-    private void cambiarVista(ActionEvent event, String fxml) {
-
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/biblioteca/" + fxml)
-            );
+            FXMLLoader loader = new FXMLLoader(LocalizadorRecursos.class.getResource("/biblioteca/menu-view.fxml"));
 
             Scene scene = new Scene(loader.load());
 
+            // Obtenemos el controlador del menu para pasarle la conexion ya creada.
             Object controller = loader.getController();
             if (controller instanceof MenuController mc) {
                 mc.setControlador(controlador);
             }
 
+            // Cogemos la ventana actual y cambiamos su escena por la del menu.
             Stage stage = (Stage) ((Node) event.getSource())
                     .getScene()
                     .getWindow();
 
             stage.setScene(scene);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            Dialogos.mostrarDialogoError("Error.","No se pudo cargar la vista");
+        } catch (Exception e) {
+            Dialogos.mostrarDialogoError("Error.", e.getMessage());
         }
     }
 }

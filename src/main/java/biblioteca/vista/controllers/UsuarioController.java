@@ -4,6 +4,7 @@ import biblioteca.modelo.dominio.Direccion;
 import biblioteca.modelo.dominio.Usuario;
 import javafx.scene.control.TextField;
 
+// Controlador del formulario de usuario.
 public class UsuarioController {
     public TextField txtID;
     public TextField txtNombre;
@@ -18,6 +19,7 @@ public class UsuarioController {
             return;
         }
 
+        // Rellena el formulario con los datos de un usuario existente.
         txtID.setText(usuario.getDni());
         txtID.setDisable(true);
         txtNombre.setText(usuario.getNombre());
@@ -25,6 +27,7 @@ public class UsuarioController {
 
         Direccion direccion = usuario.getDireccion();
         if (direccion != null) {
+            // Si tiene direccion, se rellenan tambien sus campos.
             txtVia.setText(direccion.getVia());
             txtNumero.setText(direccion.getNumero());
             txtCP.setText(direccion.getCp());
@@ -33,11 +36,13 @@ public class UsuarioController {
     }
 
     public Usuario getUsuario() {
+        // Crea un usuario con los datos escritos en el formulario.
         Usuario usuario = new Usuario(
                 txtID.getText(),
                 txtNombre.getText()
         );
 
+        // Se añade el email y la direccion al usuario creado.
         usuario.setEmail(txtEmail.getText());
         usuario.setDireccion(new Direccion(
                 txtVia.getText(),

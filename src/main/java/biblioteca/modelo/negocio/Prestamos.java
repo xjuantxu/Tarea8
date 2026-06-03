@@ -118,37 +118,6 @@ public class Prestamos {
         return prestamos;
     }
 
-    public List<Prestamo> todos(Usuario usuario) {
-        List<Prestamo> prestamos = new ArrayList<>();
-
-        if (usuario == null) {
-            return prestamos;
-        }
-
-        String sql = """
-                SELECT dni, isbn, fInicio, devuelto, fDevolucion
-                FROM prestamo
-                WHERE dni = ?
-                ORDER BY fInicio DESC
-                """;
-
-        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, usuario.getDni());
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    prestamos.add(crearPrestamo(rs));
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Error al listar prestamos del usuario.", e);
-        }
-
-        Collections.sort(prestamos);
-        return prestamos;
-    }
-
     private Prestamo crearPrestamo(ResultSet rs) throws SQLException {
         Usuario usuario = Usuarios.getInstancia().buscar(new Usuario(rs.getString("dni")));
         Libro libro = Libros.getInstancia().buscar(new Libro(rs.getString("isbn")));

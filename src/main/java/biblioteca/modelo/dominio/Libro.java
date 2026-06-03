@@ -128,22 +128,6 @@ public class Libro implements Comparable<Libro>{
 
         throw new IllegalStateException("Máximo número de autores alcanzado");
     } //Añadir autor
-    public void borrarAutor(Autor autor) {
-        if (autor == null) return;
-
-        for (int i = 0; i < MAX_AUTORES; i++) {
-            if (autores[i] != null && autores[i].equals(autor)) {
-
-                for (int j = i; j < MAX_AUTORES - 1; j++) {
-                    autores[j] = autores[j + 1];
-                }
-
-                autores[MAX_AUTORES - 1] = null;
-
-                return;
-            }
-        }
-    }
 
     private String formatearAutores() {
         StringBuilder sb = new StringBuilder();

@@ -14,7 +14,6 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Editar">
                     <items>
-                        <MenuItem fx:id="menuEditar" mnemonicParsing="false" onAction="#onEditarClick" text="Editar..." />
                         <MenuItem fx:id="menuEliminar" mnemonicParsing="false" onAction="#onEliminarClick" text="Eliminar" />
                     </items>
                 </Menu>
@@ -33,23 +32,19 @@
             <contextMenu>
                 <ContextMenu>
                     <items>
-                        <MenuItem fx:id="cxtEditar" mnemonicParsing="false" onAction="#onEditarClick" text="Editar" />
                         <MenuItem fx:id="cxtEliminar" mnemonicParsing="false" onAction="#onEliminarClick" text="Eliminar" />
                     </items>
                 </ContextMenu>
             </contextMenu>
             <columns>
-                <TableColumn fx:id="colID" prefWidth="75.0" text="DNI" />
-                <TableColumn fx:id="colNombre" prefWidth="75.0" text="Nombre" />
-                <TableColumn fx:id="colEmail" prefWidth="75.0" text="Email" />
-                <TableColumn fx:id="colVia" prefWidth="75.0" text="Via" />
-                <TableColumn fx:id="colNumero" prefWidth="75.0" text="Numero" />
-                <TableColumn fx:id="colCP" prefWidth="75.0" text="Codigo Postal" />
-                <TableColumn fx:id="colLocalidad" prefWidth="105.0" text="Localidad" />
+                <TableColumn fx:id="colID" prefWidth="110.0" text="DNI" />
+                <TableColumn fx:id="colNombre" prefWidth="170.0" text="Nombre" />
+                <TableColumn fx:id="colEmail" prefWidth="220.0" text="Email" />
+                <TableColumn fx:id="colVia" prefWidth="140.0" text="Via" />
+                <TableColumn fx:id="colNumero" prefWidth="90.0" text="Numero" />
+                <TableColumn fx:id="colCP" prefWidth="115.0" text="Codigo Postal" />
+                <TableColumn fx:id="colLocalidad" prefWidth="140.0" text="Localidad" />
             </columns>
-            <columnResizePolicy>
-                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-            </columnResizePolicy>
         </TableView>
         <Button fx:id="btnNuevo" layoutX="45.0" layoutY="618.0" mnemonicParsing="false" onAction="#onNuevoClick" prefHeight="40.0" prefWidth="96.0" text="Nuevo Usuario" />
         <Button layoutX="606.0" layoutY="618.0" mnemonicParsing="false" onAction="#onVolverClick" prefHeight="40.0" prefWidth="96.0" text="Volver" />
